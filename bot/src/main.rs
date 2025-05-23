@@ -313,23 +313,24 @@ async fn accept(
                         }
                     }
                 }
+            } else {
+                ctx.send(
+                    poise::CreateReply::default().embed(create_embed(
+                        format!(
+                            "{} accepted",
+                            match kind {
+                                model::DbType::Dare => "Dare",
+                                model::DbType::Truth => "Truth",
+                            }
+                        )
+                        .as_str(),
+                        "",
+                        "",
+                        serenity::Colour::BLITZ_BLUE,
+                    )),
+                )
+                .await?;
             }
-            ctx.send(
-                poise::CreateReply::default().embed(create_embed(
-                    format!(
-                        "{} accepted",
-                        match kind {
-                            model::DbType::Dare => "Dare",
-                            model::DbType::Truth => "Truth",
-                        }
-                    )
-                    .as_str(),
-                    "",
-                    "",
-                    serenity::Colour::BLITZ_BLUE,
-                )),
-            )
-            .await?;
         }
         Err(e) => {
             println!("{e}");
@@ -614,7 +615,7 @@ async fn main() {
                 delete(),
                 list_dares(),
                 list_truths(),
-                help()
+                help(),
             ],
             ..Default::default()
         })
