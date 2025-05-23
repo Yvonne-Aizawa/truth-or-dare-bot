@@ -1,17 +1,14 @@
-use diesel::prelude::*;
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness};
 use std::env;
 
 use diesel_migrations::embed_migrations;
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
-use diesel::{Connection, RunQueryDsl, SqliteConnection, connection, query_dsl::methods::FindDsl};
+use diesel::{Connection, RunQueryDsl, SqliteConnection};
 use diesel::{ExpressionMethods, QueryDsl, QueryResult};
-use dotenvy::dotenv;
 
 use crate::model::{Dare, DbType, NewDare, Rating, Status, UpdateDare, UpdateTruth};
 
 use crate::schema::dares::dsl::{dares, id as d_id};
-use crate::schema::dares::status;
 use crate::schema::truths::dsl::{id as t_id, truths};
 use crate::{model::NewTruth, model::Truth};
 pub struct DbService {
@@ -179,11 +176,11 @@ impl DbService {
     pub fn accept(&mut self, db_type: DbType, id: i32) -> Result<(), diesel::result::Error> {
         match db_type {
             DbType::Truth => {
-                let truth = self.accept_truth(id)?;
+                let _truth = self.accept_truth(id)?;
                 Ok(())
             }
             DbType::Dare => {
-                let dare = self.accept_dare(id)?;
+                let _dare = self.accept_dare(id)?;
                 Ok(())
             }
         }
@@ -191,11 +188,11 @@ impl DbService {
     pub fn delete(&mut self, db_type: DbType, id: i32) -> Result<(), diesel::result::Error> {
         match db_type {
             DbType::Truth => {
-                let truth = self.delete_truth(id)?;
+                let _ = self.delete_truth(id)?;
                 Ok(())
             }
             DbType::Dare => {
-                let dare = self.delete_dare(id)?;
+                let _ = self.delete_dare(id)?;
                 Ok(())
             }
         }

@@ -6,7 +6,7 @@ use database::service::DbService;
 use database::*;
 use model::{NewDare, NewTruth, Rating, Status, UpdateTruth};
 mod helper;
-use poise::serenity_prelude::{self as serenity, CreateEmbed, model::error};
+use poise::serenity_prelude::{self as serenity, CreateEmbed};
 
 #[poise::command(slash_command)]
 pub async fn register(ctx: ApplicationContext<'_>) -> Result<(), Error> {
@@ -125,7 +125,7 @@ async fn get_dare(
     let res = db.get_random_dare(rating);
     match res {
         Ok(dare) => {
-            let status_string = dare.status().to_string();
+            let _status_string = dare.status().to_string();
             let rating_string = dare.rating().to_string();
             let content_string = dare.content().to_string();
             ctx.send(
@@ -196,7 +196,7 @@ async fn get_truth(
     let res = db.get_random_truth(rating);
     match res {
         Ok(truth) => {
-            let status_string = truth.status().to_string();
+            let _status_string = truth.status().to_string();
             let rating_string = truth.rating().to_string();
             let content_string = truth.content().to_string();
             ctx.send(
