@@ -605,7 +605,7 @@ async fn main() {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: vec![
-                register(),
+                // register(),
                 add_truth(),
                 add_dare(),
                 get_dare(),
