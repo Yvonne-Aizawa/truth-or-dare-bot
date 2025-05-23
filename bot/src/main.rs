@@ -569,6 +569,29 @@ async fn list_truths(
     }
     Ok(())
 }
+
+// Show Help
+#[poise::command(slash_command)]
+async fn help(ctx: ApplicationContext<'_>) -> Result<(), Error> {
+    let help = "**Commands**\n\
+    `/add_truth` - Add a truth\n\
+    `/add_dare` - Add a dare\n\
+    `/get_truth` - Get a random truth\n\
+    `/get_dare` - Get a random dare\n\
+     admin only \n\
+    `/accept` - Accept a truth or dare\n\
+    `/delete` - Delete a truth or dare\n\
+    `/list_truths` - List all truths\n\
+    `/list_dares` - List all dares";
+    ctx.send(poise::CreateReply::default().embed(create_embed(
+        "Help",
+        help,
+        "",
+        serenity::Colour::ORANGE,
+    )))
+    .await?;
+    Ok(())
+}
 // This is the main function that runs the bot
 #[tokio::main]
 async fn main() {
@@ -591,6 +614,7 @@ async fn main() {
                 delete(),
                 list_dares(),
                 list_truths(),
+                help()
             ],
             ..Default::default()
         })
