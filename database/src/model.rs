@@ -149,7 +149,7 @@ impl FromSql<Text, Sqlite> for Rating {
 }
 
 //for status
-#[derive(Debug, Clone, Copy, AsExpression, FromSqlRow, ChoiceParameter)]
+#[derive(Debug, Clone, Copy, AsExpression, FromSqlRow, ChoiceParameter, PartialEq)]
 #[diesel(sql_type = Text)]
 pub enum Status {
     PENDING,

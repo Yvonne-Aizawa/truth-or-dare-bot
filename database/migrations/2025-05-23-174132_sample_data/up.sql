@@ -1,25 +1,25 @@
 -- Your SQL goes here
-INSERT INTO dares (content, author, rating, status)
-VALUES 
-    ('Do 20 push-ups in front of everyone.', 536661119104712746, 'SFW', 'ACCEPTED'),
-    ('Send a funny selfie to your last text contact.', 536661119104712746, 'SFW', 'PENDING'),
-    ('Call your crush and confess your feelings.', 536661119104712746, 'SFW', 'PENDING'),
-    ('Post an embarrassing photo on your story.', 536661119104712746, 'NSFW', 'REJECTED'),
-    ('Sing a song loudly in a public place.', 536661119104712746, 'SFW', 'ACCEPTED'),
-    ('Eat a spoonful of hot sauce.', 536661119104712746, 'SFW', 'ACCEPTED'),
-    ('Text your ex something awkward.', 536661119104712746, 'NSFW', 'PENDING'),
-    ('Dance without music for 2 minutes.', 536661119104712746, 'SFW', 'ACCEPTED'),
-    ('Let someone write on your face with a marker.', 536661119104712746, 'SFW', 'PENDING'),
-    ('Share your last 5 Google searches.', 536661119104712746, 'NSFW', 'ACCEPTED');
-INSERT INTO truths (content, author, rating, status)
-VALUES 
-    ('What is the biggest lie you’ve ever told?', 536661119104712746, 'SFW', 'ACCEPTED'),
-    ('Have you ever had a crush on a friend’s partner?', 536661119104712746, 'NSFW', 'PENDING'),
-    ('What’s a secret you’ve never told anyone?', 536661119104712746, 'NSFW', 'REJECTED'),
-    ('Have you ever cheated on a test?', 536661119104712746, 'SFW', 'ACCEPTED'),
-    ('Who was your first kiss, and what was it like?', 536661119104712746, 'SFW', 'PENDING'),
-    ('What’s the most embarrassing thing you’ve done drunk?', 536661119104712746, 'NSFW', 'ACCEPTED'),
-    ('Do you have any hidden talents?', 536661119104712746, 'SFW', 'ACCEPTED'),
-    ('What’s something you regret doing?', 536661119104712746, 'SFW', 'PENDING'),
-    ('What’s the worst thing you’ve ever said to someone?', 536661119104712746, 'NSFW', 'REJECTED'),
-    ('Have you ever stalked someone on social media?', 536661119104712746, 'SFW', 'PENDING');
+-- INSERT INTO dares (content, author, rating, status)
+-- VALUES 
+--     ('Do 20 push-ups in front of everyone.', 536661119104712746, 'SFW', 'ACCEPTED'),
+--     ('Send a funny selfie to your last text contact.', 536661119104712746, 'SFW', 'PENDING'),
+--     ('Call your crush and confess your feelings.', 536661119104712746, 'SFW', 'PENDING'),
+--     ('Post an embarrassing photo on your story.', 536661119104712746, 'NSFW', 'REJECTED'),
+--     ('Sing a song loudly in a public place.', 536661119104712746, 'SFW', 'ACCEPTED'),
+--     ('Eat a spoonful of hot sauce.', 536661119104712746, 'SFW', 'ACCEPTED'),
+--     ('Text your ex something awkward.', 536661119104712746, 'NSFW', 'PENDING'),
+--     ('Dance without music for 2 minutes.', 536661119104712746, 'SFW', 'ACCEPTED'),
+--     ('Let someone write on your face with a marker.', 536661119104712746, 'SFW', 'PENDING'),
+--     ('Share your last 5 Google searches.', 536661119104712746, 'NSFW', 'ACCEPTED');
+-- INSERT INTO truths (content, author, rating, status)
+-- VALUES 
+--     ('What is the biggest lie you’ve ever told?', 536661119104712746, 'SFW', 'ACCEPTED'),
+--     ('Have you ever had a crush on a friend’s partner?', 536661119104712746, 'NSFW', 'PENDING'),
+--     ('What’s a secret you’ve never told anyone?', 536661119104712746, 'NSFW', 'REJECTED'),
+--     ('Have you ever cheated on a test?', 536661119104712746, 'SFW', 'ACCEPTED'),
+--     ('Who was your first kiss, and what was it like?', 536661119104712746, 'SFW', 'PENDING'),
+--     ('What’s the most embarrassing thing you’ve done drunk?', 536661119104712746, 'NSFW', 'ACCEPTED'),
+--     ('Do you have any hidden talents?', 536661119104712746, 'SFW', 'ACCEPTED'),
+--     ('What’s something you regret doing?', 536661119104712746, 'SFW', 'PENDING'),
+--     ('What’s the worst thing you’ve ever said to someone?', 536661119104712746, 'NSFW', 'REJECTED'),
+--     ('Have you ever stalked someone on social media?', 536661119104712746, 'SFW', 'PENDING');

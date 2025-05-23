@@ -1,5 +1,9 @@
 use std::env;
+use diesel::prelude::*;
+use diesel_migrations::{EmbeddedMigrations, MigrationHarness};
 
+use diesel_migrations::embed_migrations;
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 use diesel::{Connection, RunQueryDsl, SqliteConnection, connection, query_dsl::methods::FindDsl};
 use diesel::{ExpressionMethods, QueryDsl, QueryResult};
 use dotenvy::dotenv;
@@ -21,6 +25,11 @@ impl DbService {
         let connection = SqliteConnection::establish(&url).unwrap();
 
         DbService { connection }
+    }
+
+    pub fn run_migrations(&mut self)  {
+
+        let _ = self.connection.run_pending_migrations(MIGRATIONS);
     }
     //truth stuff
 

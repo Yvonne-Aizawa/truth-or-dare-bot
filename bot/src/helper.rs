@@ -43,3 +43,8 @@ pub async fn is_age_gated(ctx: ApplicationContext<'_>) -> Result<bool, Error> {
         .map_err(|e| format!("Error fetching channel: {}", e))?;
     Ok(channel.guild().map(|c| c.nsfw).unwrap_or(false)) // fail to sfw to prevent nsfw in safe channels
 }
+pub fn paginate<T>(vec: &[T], page: usize, per_page: usize) -> &[T] {
+    let start = page.saturating_sub(1) * per_page;
+    let end = start + per_page;
+    &vec[start.min(vec.len())..end.min(vec.len())]
+}

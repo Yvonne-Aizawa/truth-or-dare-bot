@@ -345,7 +345,6 @@ async fn delete(
     ctx: ApplicationContext<'_>,
     kind: database::model::DbType,
     id: i32,
-    rating_overide: Option<Rating>,
 ) -> Result<(), Error> {
     let is_admin = helper::is_admin(ctx).await?;
     if !is_admin {
@@ -386,11 +385,197 @@ async fn delete(
     }
     Ok(())
 }
+//list dares
+#[poise::command(slash_command)]
+async fn list_dares(
+    ctx: ApplicationContext<'_>,
+    #[description = "Page number"] page: Option<i32>,
+    #[description = "Rating filter"] rating: Option<Rating>,
+    #[description = "Status filter"] status: Option<Status>,
+) -> Result<(), Error> {
+    let is_admin = helper::is_admin(ctx).await?;
+    if !is_admin {
+        ctx.send(poise::CreateReply::default().embed(create_embed(
+            "You are not allowed to do this",
+            "Ask an admin to do it for you",
+            "",
+            serenity::Colour::RED,
+        )))
+        .await?;
+        return Ok(());
+    }
+    let mut db = DbService::new();
+    let res = db.list_dares_filtered(rating, status);
+    let page = page.unwrap_or(0);
+    if page < 0 {
+        ctx.send(poise::CreateReply::default().embed(create_embed(
+            "Page number must be greater than 0",
+            "",
+            "",
+            serenity::Colour::RED,
+        )))
+        .await?;
+        return Ok(());
+    }
 
+    let page: usize = page.try_into()?;
+
+    match res {
+        Ok(dares) => {
+            //if dares is empty, return error
+            if dares.is_empty() {
+                ctx.send(poise::CreateReply::default().embed(create_embed(
+                    "No dares found",
+                    "Add a new one. or ask admins to approve some",
+                    "",
+                    serenity::Colour::RED,
+                )))
+                .await?;
+                return Ok(());
+            }
+            let max_len = (dares.len() + 5 - 1) / 5;
+            if page > max_len {
+                ctx.send(poise::CreateReply::default().embed(create_embed(
+                    "Page number out of range",
+                    format!("Max page number is {}", max_len).as_str(),
+                    "",
+                    serenity::Colour::RED,
+                )))
+                .await?;
+                return Ok(());
+            }
+            let mut content = String::new();
+            for dare in helper::paginate(&dares, page, 5) {
+                content.push_str(&format!(
+                    "ID:{}, Content: {},{}{}\n",
+                    dare.id(),
+                    dare.content(),
+                    if dare.status() == Status::ACCEPTED {
+                        "✅"
+                    } else {
+                        "❌"
+                    },
+                    if dare.rating() == Rating::NSFW {
+                        "🔥"
+                    } else {
+                        "💧"
+                    }
+                ));
+            }
+            ctx.send(poise::CreateReply::default().embed(create_embed(
+                "Dares List",
+                format!("{content}").as_str(),
+                "",
+                serenity::Colour::ORANGE,
+            )))
+            .await?;
+        }
+        Err(e) => {
+            println!("{e}");
+            error_happened(Box::new(e), Some(ctx)).await?;
+        }
+    }
+    Ok(())
+}
+// list truths
+#[poise::command(slash_command)]
+async fn list_truths(
+    ctx: ApplicationContext<'_>,
+    #[description = "Page number"] page: Option<i32>,
+    #[description = "Rating filter"] rating: Option<Rating>,
+    #[description = "Status filter"] status: Option<Status>,
+) -> Result<(), Error> {
+    let is_admin = helper::is_admin(ctx).await?;
+    if !is_admin {
+        ctx.send(poise::CreateReply::default().embed(create_embed(
+            "You are not allowed to do this",
+            "Ask an admin to do it for you",
+            "",
+            serenity::Colour::RED,
+        )))
+        .await?;
+        return Ok(());
+    }
+    let mut db = DbService::new();
+    let res = db.list_truths_filtered(rating, status);
+    let page = page.unwrap_or(0);
+    if page < 0 {
+        ctx.send(poise::CreateReply::default().embed(create_embed(
+            "Page number must be greater than 0",
+            "",
+            "",
+            serenity::Colour::RED,
+        )))
+        .await?;
+        return Ok(());
+    }
+
+    let page: usize = page.try_into()?;
+
+    match res {
+        Ok(truths) => {
+            //if truths is empty, return error
+            if truths.is_empty() {
+                ctx.send(poise::CreateReply::default().embed(create_embed(
+                    "No truths found",
+                    "Add a new one. or ask admins to approve some.",
+                    "",
+                    serenity::Colour::RED,
+                )))
+                .await?;
+                return Ok(());
+            }
+            let max_len = (truths.len() + 5 - 1) / 5;
+            if page > max_len {
+                ctx.send(poise::CreateReply::default().embed(create_embed(
+                    "Page number out of range",
+                    format!("Max page number is {}", max_len).as_str(),
+                    "",
+                    serenity::Colour::RED,
+                )))
+                .await?;
+                return Ok(());
+            }
+            let mut content = String::new();
+            for truth in helper::paginate(&truths, page, 5) {
+                content.push_str(&format!(
+                    "ID:{}, Content: {},{}{}\n",
+                    truth.id(),
+                    truth.content(),
+                    if truth.status() == Status::ACCEPTED {
+                        "✅"
+                    } else {
+                        "❌"
+                    },
+                    if truth.rating() == Rating::NSFW {
+                        "🔥"
+                    } else {
+                        "💧"
+                    }
+                ));
+            }
+            ctx.send(poise::CreateReply::default().embed(create_embed(
+                "Truths List",
+                format!("{content}").as_str(),
+                "",
+                serenity::Colour::ORANGE,
+            )))
+            .await?;
+        }
+        Err(e) => {
+            println!("{e}");
+            error_happened(Box::new(e), Some(ctx)).await?;
+        }
+    }
+    Ok(())
+}
 // This is the main function that runs the bot
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
+    let mut db = DbService::new();
+    // Create the database tables if they don't exist
+    db.run_migrations();
     let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
     let intents = serenity::GatewayIntents::non_privileged();
 
@@ -404,6 +589,8 @@ async fn main() {
                 get_truth(),
                 accept(),
                 delete(),
+                list_dares(),
+                list_truths(),
             ],
             ..Default::default()
         })
