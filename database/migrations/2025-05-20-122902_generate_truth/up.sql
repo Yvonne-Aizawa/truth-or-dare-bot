@@ -1,0 +1,9 @@
+-- Your SQL goes here
+CREATE TABLE truths (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    content TEXT NOT NULL,
+    author TEXT NOT NULL,
+    rating TEXT NOT NULL CHECK (rating IN ('SFW', 'NSFW')),
+    status TEXT NOT NULL CHECK (status IN ('PENDING', 'ACCEPTED', 'REJECTED')),
+    submit_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
