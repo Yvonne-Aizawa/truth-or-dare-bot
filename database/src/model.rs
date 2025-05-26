@@ -16,6 +16,15 @@ pub enum DbType {
     #[name = "Dare Challange"]
     Dare,
 }
+//implement display for DbType
+impl std::fmt::Display for DbType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DbType::Truth => write!(f, "Truth Question"),
+            DbType::Dare => write!(f, "Dare Challange"),
+        }
+    }
+}
 #[derive(Queryable, Debug, Identifiable)]
 #[diesel(table_name = crate::schema::truths)]
 pub struct Truth {
@@ -188,4 +197,51 @@ impl FromSql<Text, Sqlite> for Status {
             _ => Err("Unrecognized enum variant".into()),
         }
     }
+}
+
+// Moderation
+
+#[derive(Queryable, Debug, Identifiable)]
+#[diesel(table_name = crate::schema::moderation)]
+pub struct Moderation {
+    id: i32,
+    moderation_type: String, // Use String for flexibility
+    kind: String,
+    item_id: i32,
+    moderator_id: String,
+    reason: Option<String>,
+    timestamp: NaiveDateTime,
+}
+impl Moderation {
+    pub fn id(&self) -> i32 {
+        self.id
+    }
+    pub fn moderation_type(&self) -> String {
+        self.moderation_type.clone()
+    }
+    pub fn kind(&self) -> String {
+        self.kind.clone()
+    }
+    pub fn item_id(&self) -> i32 {
+        self.item_id
+    }
+    pub fn moderator_id(&self) -> String {
+        self.moderator_id.clone()
+    }
+    pub fn reason(&self) -> Option<String> {
+        self.reason.clone()
+    }
+    pub fn timestamp(&self) -> NaiveDateTime {
+        self.timestamp
+    }
+}
+#[derive(Insertable)]
+#[diesel(table_name = crate::schema::moderation)]
+pub struct NewModeration<'a> {
+    pub moderation_type: String,
+    pub kind: &'a str,
+    pub item_id: i32,
+    pub moderator_id: String,
+    pub reason: Option<&'a str>,
+    pub timestamp: NaiveDateTime,
 }

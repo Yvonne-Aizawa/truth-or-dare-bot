@@ -7,6 +7,10 @@ use database::*;
 use model::{NewDare, NewTruth, Rating, Status, UpdateTruth};
 mod helper;
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
+use std::collections::HashMap;
+use std::sync::Arc;
+use std::time::{Duration, Instant};
+use tokio::sync::Mutex;
 
 #[poise::command(slash_command)]
 pub async fn register(ctx: ApplicationContext<'_>) -> Result<(), Error> {
@@ -21,6 +25,16 @@ async fn add_truth(
     #[description = "Truth content"] content: String,
     #[description = "Truth rating"] rating: Rating,
 ) -> Result<(), Error> {
+    if helper::check_and_update_cooldown(&ctx, 30).await? {
+        ctx.send(poise::CreateReply::default().embed(create_embed(
+            "Cooldown active",
+            "Please wait before submitting another truth.",
+            "",
+            serenity::Colour::RED,
+        )))
+        .await?;
+        return Ok(());
+    }
     let mut db = DbService::new();
     let new_truth = NewTruth {
         content: &content,
@@ -38,7 +52,13 @@ async fn add_truth(
         Ok(truth) => {
             let status_string = truth.status().to_string();
             let content_string = truth.content().to_string();
-            println!("Truth added successfully!");
+            db.new_moderation(
+                "Truth Added".to_string(),
+                "Truth added by user".to_string(),
+                truth.id(),
+                ctx.author().id.get().to_string(),
+                None,
+            )?;
             ctx.send(poise::CreateReply::default().embed(create_embed(
                 &format!("Truth added with status: {}", status_string),
                 &content_string,
@@ -62,6 +82,17 @@ async fn add_dare(
     #[description = "Dare content"] content: String,
     #[description = "Dare rating"] rating: Rating,
 ) -> Result<(), Error> {
+    if helper::check_and_update_cooldown(&ctx, 30).await? {
+        ctx.send(poise::CreateReply::default().embed(create_embed(
+            "Cooldown active",
+            "Please wait before submitting another dare.",
+            "",
+            serenity::Colour::RED,
+        )))
+        .await?;
+        return Ok(());
+    }
+
     let mut db = DbService::new();
     let new_dare = NewDare {
         content: &content,
@@ -79,6 +110,13 @@ async fn add_dare(
         Ok(dare) => {
             let status_string = dare.status().to_string();
             let content_string = dare.content().to_string();
+            db.new_moderation(
+                "Dare Added".to_string(),
+                "Dare added by user".to_string(),
+                dare.id(),
+                ctx.author().id.get().to_string(),
+                None,
+            )?;
             println!("Dare added successfully!");
             ctx.send(poise::CreateReply::default().embed(create_embed(
                 &format!("Dare added with status: {}", status_string),
@@ -272,7 +310,14 @@ async fn accept(
                             },
                         );
                         match res {
-                            Ok(_) => {
+                            Ok(t) => {
+                                db.new_moderation(
+                                    "Truth Accepted".to_string(),
+                                    "truth accepted by admin".to_string(),
+                                    t.id(),
+                                    ctx.author().id.get().to_string(),
+                                    None,
+                                )?;
                                 ctx.send(poise::CreateReply::default().embed(create_embed(
                                     "Truth accepted",
                                     "",
@@ -297,7 +342,14 @@ async fn accept(
                             },
                         );
                         match res {
-                            Ok(_) => {
+                            Ok(d) => {
+                                db.new_moderation(
+                                    "Dare Accepted".to_string(),
+                                    "Dare accepted by admin".to_string(),
+                                    d.id(),
+                                    ctx.author().id.get().to_string(),
+                                    None,
+                                )?;
                                 ctx.send(poise::CreateReply::default().embed(create_embed(
                                     "Dare accepted",
                                     "",
@@ -340,6 +392,61 @@ async fn accept(
     Ok(())
 }
 
+// Reject a truth/dare
+#[poise::command(slash_command)]
+async fn reject(
+    ctx: ApplicationContext<'_>,
+    kind: database::model::DbType,
+    id: i32,
+    #[description = "Optional reason for rejection"] reason: Option<String>,
+) -> Result<(), Error> {
+    let is_admin = helper::is_admin(ctx).await?;
+    if !is_admin {
+        ctx.send(poise::CreateReply::default().embed(create_embed(
+            "You are not allowed to do this",
+            "Ask an admin to do it for you",
+            "",
+            serenity::Colour::RED,
+        )))
+        .await?;
+        return Ok(());
+    }
+    let mut db = DbService::new();
+    let res = db.reject(kind, id);
+    match res {
+        Ok(_) => {
+            db.new_moderation(
+                "Suggestion Rejected".to_string(),
+                format!("{kind} rejected by admin").to_string(),
+                id,
+                ctx.author().id.get().to_string(),
+                reason,
+            )?;
+            ctx.send(
+                poise::CreateReply::default().embed(create_embed(
+                    format!(
+                        "{} rejected",
+                        match kind {
+                            model::DbType::Dare => "Dare",
+                            model::DbType::Truth => "Truth",
+                        }
+                    )
+                    .as_str(),
+                    "",
+                    "",
+                    serenity::Colour::BLITZ_BLUE,
+                )),
+            )
+            .await?;
+        }
+        Err(e) => {
+            println!("{e}");
+            error_happened(Box::new(e), Some(ctx)).await?;
+        }
+    }
+    Ok(())
+}
+
 //delete a truth/dare
 #[poise::command(slash_command)]
 async fn delete(
@@ -362,6 +469,13 @@ async fn delete(
     let res = db.delete(kind, id);
     match res {
         Ok(_) => {
+            db.new_moderation(
+                "Suggestion Deleted".to_string(),
+                format!("{kind} deleted by admin").to_string(),
+                id,
+                ctx.author().id.get().to_string(),
+                None,
+            )?;
             ctx.send(
                 poise::CreateReply::default().embed(create_embed(
                     format!(
@@ -581,6 +695,7 @@ async fn help(ctx: ApplicationContext<'_>) -> Result<(), Error> {
     `/get_dare` - Get a random dare\n\
      admin only \n\
     `/accept` - Accept a truth or dare\n\
+    `/reject` - Reject a truth or dare\n\
     `/delete` - Delete a truth or dare\n\
     `/list_truths` - List all truths\n\
     `/list_dares` - List all dares";
@@ -612,6 +727,7 @@ async fn main() {
                 get_dare(),
                 get_truth(),
                 accept(),
+                reject(),
                 delete(),
                 list_dares(),
                 list_truths(),
@@ -622,7 +738,9 @@ async fn main() {
         .setup(|ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(Data {})
+                Ok(Data {
+                    cooldowns: Arc::new(Mutex::new(HashMap::new())),
+                })
             })
         })
         .build();

@@ -335,6 +335,7 @@ dependencies = [
  "diesel",
  "diesel_migrations",
  "dotenvy",
+ "libsqlite3-sys",
  "poise",
  "tokio",
 ]
@@ -966,10 +967,11 @@ checksum = "f9fbbcab51052fe104eb5e5d351cf728d30a5be1fe14d9be8a3b097481fb97de"
 
 [[package]]
 name = "libsqlite3-sys"
-version = "0.33.0"
+version = "0.32.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "947e6816f7825b2b45027c2c32e7085da9934defa535de4a6a46b10a4d5257fa"
+checksum = "fbb8270bb4060bd76c6e96f20c52d80620f1d82a3470885694e41e0f81ef6fe7"
 dependencies = [
+ "cc",
  "pkg-config",
  "vcpkg",
 ]
@@ -1870,7 +1872,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "tod_types"
+name = "tod_bot"
 version = "0.1.0"
 dependencies = [
  "chrono",
@@ -1883,9 +1885,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.45.0"
+version = "1.45.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2513ca694ef9ede0fb23fe71a4ee4107cb102b9dc1930f6d0fd77aae068ae165"
+checksum = "75ef51a33ef1da925cea3e4eb122833cb377c61439ca401b770f54902b806779"
 dependencies = [
  "backtrace",
  "bytes",

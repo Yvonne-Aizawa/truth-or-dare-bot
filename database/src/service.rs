@@ -9,6 +9,7 @@ use diesel::{ExpressionMethods, QueryDsl, QueryResult};
 use crate::model::{Dare, DbType, NewDare, Rating, Status, UpdateDare, UpdateTruth};
 
 use crate::schema::dares::dsl::{dares, id as d_id};
+use crate::schema::moderation::kind;
 use crate::schema::truths::dsl::{id as t_id, truths};
 use crate::{model::NewTruth, model::Truth};
 pub struct DbService {
@@ -100,6 +101,17 @@ impl DbService {
             .returning(crate::schema::truths::all_columns)
             .get_result(&mut self.connection)
     }
+    pub fn reject_truth(&mut self, truth_id: i32) -> Result<Truth, diesel::result::Error> {
+        let updated_truth = UpdateTruth {
+            content: None,
+            rating: None,
+            status: Some(Status::REJECTED),
+        };
+        diesel::update(truths.filter(t_id.eq(truth_id)))
+            .set(updated_truth)
+            .returning(crate::schema::truths::all_columns)
+            .get_result(&mut self.connection)
+    }
     // dare stuff
     pub fn create_dare(&mut self, new_dare: NewDare) -> QueryResult<Dare> {
         diesel::insert_into(crate::schema::dares::table)
@@ -172,6 +184,17 @@ impl DbService {
             .returning(crate::schema::dares::all_columns)
             .get_result(&mut self.connection)
     }
+    pub fn reject_dare(&mut self, dare_id: i32) -> Result<Dare, diesel::result::Error> {
+        let updated_dare = UpdateDare {
+            content: None,
+            rating: None,
+            status: Some(Status::REJECTED),
+        };
+        diesel::update(dares.filter(d_id.eq(dare_id)))
+            .set(updated_dare)
+            .returning(crate::schema::dares::all_columns)
+            .get_result(&mut self.connection)
+    }
     // accept
     pub fn accept(&mut self, db_type: DbType, id: i32) -> Result<(), diesel::result::Error> {
         match db_type {
@@ -181,6 +204,19 @@ impl DbService {
             }
             DbType::Dare => {
                 let _dare = self.accept_dare(id)?;
+                Ok(())
+            }
+        }
+    }
+    // reject
+    pub fn reject(&mut self, db_type: DbType, id: i32) -> Result<(), diesel::result::Error> {
+        match db_type {
+            DbType::Truth => {
+                let _truth = self.reject_truth(id)?;
+                Ok(())
+            }
+            DbType::Dare => {
+                let _dare = self.reject_dare(id)?;
                 Ok(())
             }
         }
@@ -196,5 +232,27 @@ impl DbService {
                 Ok(())
             }
         }
+    }
+    // moderation
+    pub fn new_moderation(
+        &mut self,
+        moderation_type: String,
+        other_kind: String, // Assuming kind is a String, adjust as necessary
+        item_id: i32,
+        moderator_id: String,
+        reason: Option<String>,
+    ) -> QueryResult<()> {
+        let moderation = crate::model::NewModeration {
+            moderation_type,
+            kind: &other_kind,
+            item_id,
+            moderator_id,
+            reason: reason.as_deref(),
+            timestamp: chrono::Utc::now().naive_utc(),
+        };
+        diesel::insert_into(crate::schema::moderation::table)
+            .values(&moderation)
+            .execute(&mut self.connection)?;
+        Ok(())
     }
 }
