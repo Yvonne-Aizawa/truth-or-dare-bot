@@ -255,4 +255,21 @@ impl DbService {
             .execute(&mut self.connection)?;
         Ok(())
     }
+    pub fn new_error_log(
+        &mut self,
+        error_message: String,
+        error_code: String,
+        stack_trace: Option<String>,
+    ) -> QueryResult<()> {
+        let error_log = crate::model::NewErrorLog {
+            error_message,
+            error_code,
+            stack_trace: stack_trace.as_deref(),
+            timestamp: chrono::Utc::now().naive_utc(),
+        };
+        diesel::insert_into(crate::schema::error_log::table)
+            .values(&error_log)
+            .execute(&mut self.connection)?;
+        Ok(())
+    }
 }

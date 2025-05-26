@@ -25,6 +25,19 @@ async fn add_truth(
     #[description = "Truth content"] content: String,
     #[description = "Truth rating"] rating: Rating,
 ) -> Result<(), Error> {
+    // Check if the user is in a safe channel and the rating is not safe
+    let is_safe_channel = !helper::is_age_gated(ctx).await?;
+    // if we are in a safe channel and the rating is not safe, return error
+    if is_safe_channel && rating == Rating::NSFW {
+        ctx.send(poise::CreateReply::default().embed(create_embed(
+            "This channel is not safe for this content",
+            "Please use a different channel",
+            "",
+            serenity::Colour::RED,
+        )))
+        .await?;
+        return Ok(());
+    }
     if helper::check_and_update_cooldown(&ctx, 30).await? {
         ctx.send(poise::CreateReply::default().embed(create_embed(
             "Cooldown active",
@@ -82,6 +95,19 @@ async fn add_dare(
     #[description = "Dare content"] content: String,
     #[description = "Dare rating"] rating: Rating,
 ) -> Result<(), Error> {
+    // Check if the user is in a safe channel and the rating is not safe
+    let is_safe_channel = !helper::is_age_gated(ctx).await?;
+    // if we are in a safe channel and the rating is not safe, return error
+    if is_safe_channel && rating == Rating::NSFW {
+        ctx.send(poise::CreateReply::default().embed(create_embed(
+            "This channel is not safe for this content",
+            "Please use a different channel",
+            "",
+            serenity::Colour::RED,
+        )))
+        .await?;
+        return Ok(());
+    }
     if helper::check_and_update_cooldown(&ctx, 30).await? {
         ctx.send(poise::CreateReply::default().embed(create_embed(
             "Cooldown active",
@@ -754,6 +780,12 @@ async fn main() {
 //error function
 async fn error_happened(e: Error, ctx: Option<ApplicationContext<'_>>) -> Result<(), Error> {
     println!("some kind of error happened: {}", e);
+    //save error to database
+    let mut db = DbService::new();
+    let error_message = e.to_string();
+    let error_code = format!("{:?}", e);
+
+    db.new_error_log(error_message, error_code, None)?;
     match ctx {
         None => {}
         Some(ctx) => {

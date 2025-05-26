@@ -245,3 +245,39 @@ pub struct NewModeration<'a> {
     pub reason: Option<&'a str>,
     pub timestamp: NaiveDateTime,
 }
+
+// error log
+#[derive(Queryable, Debug, Identifiable)]
+#[diesel(table_name = crate::schema::error_log)]
+pub struct ErrorLog {
+    id: i32,
+    error_message: String,
+    error_code: String,
+    stack_trace: Option<String>,
+    timestamp: NaiveDateTime,
+}
+impl ErrorLog {
+    pub fn id(&self) -> i32 {
+        self.id
+    }
+    pub fn error_message(&self) -> String {
+        self.error_message.clone()
+    }
+    pub fn error_code(&self) -> String {
+        self.error_code.clone()
+    }
+    pub fn stack_trace(&self) -> Option<String> {
+        self.stack_trace.clone()
+    }
+    pub fn timestamp(&self) -> NaiveDateTime {
+        self.timestamp
+    }
+}
+#[derive(Insertable)]
+#[diesel(table_name = crate::schema::error_log)]
+pub struct NewErrorLog<'a> {
+    pub error_message: String,
+    pub error_code: String,
+    pub stack_trace: Option<&'a str>,
+    pub timestamp: NaiveDateTime,
+}
