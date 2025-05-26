@@ -9,7 +9,6 @@ use diesel::{ExpressionMethods, QueryDsl, QueryResult};
 use crate::model::{Dare, DbType, NewDare, Rating, Status, UpdateDare, UpdateTruth};
 
 use crate::schema::dares::dsl::{dares, id as d_id};
-use crate::schema::moderation::kind;
 use crate::schema::truths::dsl::{id as t_id, truths};
 use crate::{model::NewTruth, model::Truth};
 pub struct DbService {

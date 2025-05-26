@@ -9,7 +9,6 @@ mod helper;
 use poise::serenity_prelude::{self as serenity, CreateEmbed};
 use std::collections::HashMap;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
 use tokio::sync::Mutex;
 
 #[poise::command(slash_command)]
