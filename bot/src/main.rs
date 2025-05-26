@@ -37,7 +37,7 @@ async fn add_truth(
         .await?;
         return Ok(());
     }
-    if helper::check_and_update_cooldown(&ctx, 30).await? {
+    if helper::check_and_update_cooldown(&ctx).await? {
         ctx.send(poise::CreateReply::default().embed(create_embed(
             "Cooldown active",
             "Please wait before submitting another truth.",
@@ -107,7 +107,7 @@ async fn add_dare(
         .await?;
         return Ok(());
     }
-    if helper::check_and_update_cooldown(&ctx, 30).await? {
+    if helper::check_and_update_cooldown(&ctx).await? {
         ctx.send(poise::CreateReply::default().embed(create_embed(
             "Cooldown active",
             "Please wait before submitting another dare.",

@@ -56,14 +56,16 @@ pub fn paginate<T>(vec: &[T], page: usize, per_page: usize) -> &[T] {
     &vec[start.min(vec.len())..end.min(vec.len())]
 }
 
-pub async fn check_and_update_cooldown(
-    ctx: &ApplicationContext<'_>,
-    cooldown_secs: u64,
-) -> Result<bool, Error> {
+pub async fn check_and_update_cooldown(ctx: &ApplicationContext<'_>) -> Result<bool, Error> {
     let is_admin = crate::helper::is_admin(*ctx).await?;
     if is_admin {
         return Ok(false); // No cooldown for admins
     }
+    // get cooldown from env
+    let cooldown_secs: u64 = env::var("COOLDOWN_SECONDS")
+        .unwrap_or_else(|_| "10".to_string())
+        .parse()
+        .unwrap_or(10); // Default to 10 seconds if not set
     let data = ctx.data();
     let user_id = ctx.author().id.get();
     let mut cooldowns = data.cooldowns.lock().await;
