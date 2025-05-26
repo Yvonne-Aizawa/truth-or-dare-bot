@@ -36,7 +36,36 @@ A simple Truth or Dare bot with a database backend.
    ```sh
    cd bot
    cargo run
+   # or cargo run --release (will take longer)
    ```
+## on updates
+
+in the repo
+```sh
+git pull
+cargo build
+```
+
+## running as a service 
+
+move the binary (in /target/release/tod_bot) and the .env to somewhere else make sure they are in the same folder
+
+```toml
+[Unit]
+Description=This is a truth or dare discord bot
+After=network.target
+Wants=network-online.target
+
+[Service]
+Restart=always
+Type=simple
+ExecStart=/your/path/here
+Environment=
+
+[Install]
+WantedBy=multi-user.target
+
+```
 
 ## Help
 
