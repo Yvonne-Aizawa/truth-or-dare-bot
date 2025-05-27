@@ -1,3 +1,5 @@
+use database::service::DbService;
+use poise::serenity_prelude::{self as serenity, CreateEmbed};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -77,4 +79,61 @@ pub async fn check_and_update_cooldown(ctx: &ApplicationContext<'_>) -> Result<b
     }
     cooldowns.insert(user_id, now);
     Ok(false)
+}
+//error function
+pub async fn error_happened(e: Error, ctx: Option<ApplicationContext<'_>>) -> Result<(), Error> {
+    println!("some kind of error happened: {}", e);
+    //save error to database
+    let mut db = DbService::new();
+    let error_message = e.to_string();
+    let error_code = format!("{:?}", e);
+
+    db.new_error_log(error_message, error_code, None)?;
+    match ctx {
+        None => {}
+        Some(ctx) => {
+            ctx.send(
+                poise::CreateReply::default()
+                    .ephemeral(true)
+                    .embed(create_embed(
+                        "Some kind of error happened",
+                        "Ask a server admin to look at the logs",
+                        "",
+                        serenity::Colour::RED,
+                    )),
+            )
+            .await?;
+        }
+    };
+    Ok(())
+}
+//creates an embed
+pub fn create_embed(
+    title: &str,
+    description: &str,
+    footer: &str,
+    color: serenity::Color,
+) -> CreateEmbed {
+    serenity::CreateEmbed::new()
+        .title(title)
+        .description(description)
+        .footer(serenity::CreateEmbedFooter::new(footer))
+        .color(color)
+}
+//discord user id string to username
+pub async fn get_username_from_id(id: &str, ctx: Option<ApplicationContext<'_>>) -> String {
+    match ctx {
+        None => id.to_string(),
+        Some(ctx) => {
+            let user = ctx
+                .serenity_context()
+                .http
+                .get_user(serenity::UserId::new(id.parse::<u64>().unwrap()))
+                .await;
+            match user {
+                Ok(user) => user.name,
+                Err(_) => id.to_string(),
+            }
+        }
+    }
 }
